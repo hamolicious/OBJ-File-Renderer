@@ -1,7 +1,7 @@
 import pygame
 from point import Point
 from controlls import *
-from math import sqrt
+from math import sqrt, cos, sin
 from time import time as epoh
 from sys import argv
 from colorama import Fore, Style
@@ -71,11 +71,20 @@ def LoadModel(multip):
 
 def Spin(points):
     for point in points:
+        """
+        y rotation = [cos0, 0, sin0 ] [x]
+                     [  0,  1,  0   ] [y]
+                     [-sin0, 0, cos0] [z]
+        """
+        angle = 0.02
 
-        if point.x + offsetX > 350:
-            point.x -= 2
-        elif point.x + offsetX < 350:
-            point.x += 2
+        dx = (cos(angle) * point.x) + (0 * point.y) + (sin(angle) * point.z)
+        dy = (0 * point.x) + (1 * point.y) + (0 * point.z)
+        dz = (-sin(angle) * point.x) + (0 * point.y) + (cos(angle) * point.z)
+
+        point.x = dx
+        point.y = dy
+        point.z = dz
 
     return points
 
@@ -120,7 +129,7 @@ i = highestZ
 y = 10
 shouldScroll = CheckBox(710, y, 20, 'Scroll Through Layers', 'ariel')
 y += 25
-shouldSpin = CheckBox(710, y, 20, 'Spin (BROKEN)', 'ariel')
+shouldSpin = CheckBox(710, y, 20, 'Spin', 'ariel')
 y += 25
 shouldLinealise = CheckBox(710, y, 20, 'Add Lines', 'ariel')
 y += 30
