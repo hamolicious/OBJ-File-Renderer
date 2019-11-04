@@ -1,6 +1,8 @@
 # OBJ-File-Renderer
 Renders OBJ file formats to a 2D display, uses Python and Pygame
 
+This is a rough 'sketch up' of the little side project, I will be cleaning up the UI and optimising the code a lot too later on!
+
 To use this script use the following commands:
 ```
 pip install pygame
