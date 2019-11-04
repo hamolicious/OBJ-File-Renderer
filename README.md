@@ -7,7 +7,7 @@ pip install pygame
 
 git clone https://github.com/hamolicious/OBJ-File-Renderer
 cd /OBJ-File-Renderer
-python main.py
+python main.py 'PATH_TO_OBJ_FILE'
 ```
 
 If you do not want to install any packages, you can also use repl.it to run PyGame scripts!
