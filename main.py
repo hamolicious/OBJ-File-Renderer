@@ -1,156 +1,142 @@
 import pygame
-from point import Point
-from controlls import *
-from math import sqrt, cos, sin
-from time import time as epoh
-from sys import argv
-from colorama import Fore, Style
+from formater import formatVerti
+from math import sin, cos, sqrt
+import settings
 
 pygame.init()
-pygame.display.init()
-pygame.font.init()
 
-size = [1300, 700]
+size = [700, 700]
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption('')
 
 clock = pygame.time.Clock()
 fps = 30
 
-# zooms model in
-zoom = 1
+points, order = formatVerti(settings.model_path, settings.zoom)
 
-# offsets x axis
-offsetX = 350
+render_screen = pygame.Surface((700, 700))
+render_screen.fill(0)
 
-# offsets y axis
-offsetY = 350
+print '\nPoints {}'.format(len(points))
+print 'Orders {}\n'.format(len(order))
 
-# normalises points
-multip = 10
-
-def FormatPoints(points):
+def Rotate(points):
     temp = []
-
     for point in points:
+        x, y, z = point
+
+        dx = (cos(settings.spin_speed) * x) + (0 * y) + (sin(settings.spin_speed) * z)
+        dy = (0 * x) + (1 * y) + (0 * z)
+        dz = (-sin(settings.spin_speed) * x) + (0 * y) + (cos(settings.spin_speed) * z)
+
+        temp.append([dx, dy, dz])
+
+    return temp
+
+def dist_to_color(x, y, z):
+    global mouse_pos
+
+    if settings.lightX == -1 and settings.lightY == -1 and settings.lightZ == -1:
+        return 255
+    elif settings.lightX == 0 and settings.lightY == 0 and settings.lightZ == 0:
+        return sqrt((mouse_pos[0] - x)**2 + (mouse_pos[1] - y)**2 + (500 - z)**2) % 255
+    else:
+        dist_ = sqrt((settings.lightX - x)**2 + (settings.lightY - y)**2 + (settings.lightZ - z)**2)
+        if dist_ > 0:
+            return dist_ % 255
+        else:
+            return 0
+
+def dist(x1, y1, z1, x2, y2, z2):
+    return sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+
+def Wire_Frame(render_screen, order, points):
+    for i in range(len(order) - 1):
         try:
-            if point[0] + point[1] == 'v ':
-                vertex = point.split(' ')
+            point1 = points[order[i][0]]
+            point2 = points[order[i][1]]
+            point3 = points[order[i][2]]
 
-                for verti in vertex:
-                    verti = verti.strip()
-                    verti = verti.replace('  ', '')
+            polygon = [
+                (point1[0] + settings.offsetX, point1[1] + settings.offsetY),
+                (point2[0] + settings.offsetX, point2[1] + settings.offsetY),
+                (point3[0] + settings.offsetX, point3[1] + settings.offsetY)
+            ]
 
-                temp.append(vertex)
+            color = dist_to_color(point3[0], point3[1], point3[2])
+
+            pygame.draw.polygon(render_screen, [color, color, color], polygon, 1)
         except IndexError:
             pass
 
-    return temp
+def ReturnDist(elem):
+    x, y, z = elem[0]
+    return dist(x, y, z, 350, 350, 1000)
 
-def LoadModel(multip):
-    try:
-        file = open(str(argv[1]))
-    except IndexError:
-        print( Fore.GREEN + Style.BRIGHT + '\nTry adding the obj file to the end of the python command\n' + Style.RESET_ALL)
-        quit(1)
-    points = file.readlines()
-    file.close()
+def Face_View(render_screen, order, points):
+    to_draw = []
+    for i in range(len(order) - 1):
+        if len(order[i]) == 3:
+            try:
+                point1 = points[order[i][0]]
+                point2 = points[order[i][1]]
+                point3 = points[order[i][2]]
 
-    points = FormatPoints(points)
+                polygon = [
+                    (point1[0] + settings.offsetX, point1[1] + settings.offsetY, point1[2]),
+                    (point2[0] + settings.offsetX, point2[1] + settings.offsetY, point2[2]),
+                    (point3[0] + settings.offsetX, point3[1] + settings.offsetY, point3[2])
+                ]
 
-    temp = []
+                to_draw.append(polygon)
+            except IndexError:
+                pass
+        elif len(order[i]) == 4:
+            try:
+                point1 = points[order[i][0]]
+                point2 = points[order[i][1]]
+                point3 = points[order[i][2]]
+                point4 = points[order[i][3]]
 
+                polygon = [
+                    (point1[0] + settings.offsetX, point1[1] + settings.offsetY, point1[2]),
+                    (point2[0] + settings.offsetX, point2[1] + settings.offsetY, point2[2]),
+                    (point3[0] + settings.offsetX, point3[1] + settings.offsetY, point3[2]),
+                    (point4[0] + settings.offsetX, point4[1] + settings.offsetY, point4[2])
+                ]
+
+                to_draw.append(polygon)
+            except IndexError:
+                pass
+
+
+    to_draw.sort(key=ReturnDist, reverse=True)
+
+    for draw in to_draw:
+        
+        average_x = (draw[0][0] + draw[1][0] + draw[2][0]) / 3
+        average_y = (draw[0][1] + draw[1][1] + draw[2][1]) / 3
+        average_z = (draw[0][2] + draw[1][2] + draw[2][2]) / 3
+
+        color = dist_to_color(average_x, average_y, average_z)
+
+        temp = []
+        for pol in draw:
+            temp.append((pol[0], pol[1]))
+        draw = temp
+
+        if color != 0:
+            pygame.draw.polygon(render_screen, [color, color, color], draw, 0)
+
+def Vertex_View(render_screen, order, points):
     for point in points:
-        x = int(round(float(point[1]) * multip, 0))
-        y = int(round(float(point[2]) * multip, 0))
-        z = int(round(float(point[3]) * multip, 0))
+        x = int(round(point[0], 0)) + settings.offsetX
+        y = int(round(point[1], 0)) + settings.offsetY
+        z = int(round(point[2], 0))
 
-        temp.append(Point(x, y, z))
+        color = dist_to_color(x, y, z)
 
-    return temp
-
-def Spin(points):
-    for point in points:
-        """
-        y rotation = [cos0, 0, sin0 ] [x]
-                     [  0,  1,  0   ] [y]
-                     [-sin0, 0, cos0] [z]
-        """
-        angle = 0.02
-
-        dx = (cos(angle) * point.x) + (0 * point.y) + (sin(angle) * point.z)
-        dy = (0 * point.x) + (1 * point.y) + (0 * point.z)
-        dz = (-sin(angle) * point.x) + (0 * point.y) + (cos(angle) * point.z)
-
-        point.x = dx
-        point.y = dy
-        point.z = dz
-
-    return points
-
-def Render(points, i):
-    canvas = pygame.Surface((700, 700))
-    canvas.fill(0)
-
-    if shouldSpin.boolean:
-        points = Spin(points)
-    else:
-        points = LoadModel(multip)
-    
-    for point in points:
-        if shouldScroll.boolean:
-            if point.z == i:
-                pygame.draw.rect(canvas, [255, 255, 255], point.returnRect(zoom, offsetX, offsetY), 0)
-        else:
-            pygame.draw.rect(canvas, [255, 255, 255], point.returnRect(zoom, offsetX, offsetY), 0)
-
-    if shouldLinealise.boolean:
-        for i in range(len(points) - 1):
-            a = (points[i].x * zoom + offsetX, points[i].y * zoom + offsetY)
-            b = (points[i + 1].x * zoom + offsetX, points[i + 1].y * zoom + offsetY)
-            pygame.draw.line(canvas, [200, 200, 200], a, b, 1)
-
-    canvas = pygame.transform.rotate(canvas, 180)
-
-    return canvas
-
-points = LoadModel(multip)
-
-lowestZ = 10**10
-highestZ = 0
-for point in points:
-    if point.z > highestZ:
-        highestZ = point.z
-
-    if point.z < lowestZ:
-        lowestZ = point.z
-i = highestZ
-
-y = 10
-shouldScroll = CheckBox(710, y, 20, 'Scroll Through Layers', 'ariel')
-y += 25
-shouldSpin = CheckBox(710, y, 20, 'Spin', 'ariel')
-y += 25
-shouldLinealise = CheckBox(710, y, 20, 'Add Lines', 'ariel')
-y += 30
-incXOffBtn = Button(710, y, 2, '+ X Offset', 'ariel')
-y += 25
-decXOffBtn = Button(710, y, 2, '- X Offset', 'ariel')
-y += 30
-incYOffBtn = Button(710, y, 2, '+ Y Offset', 'ariel')
-y += 25
-decYOffBtn = Button(710, y, 2, '- Y Offset', 'ariel')
-y += 30
-incZoom = Button(710, y, 2, '+ Zoom', 'ariel')
-y += 25
-decZoom = Button(710, y, 2, '- Zoom', 'ariel')
-y += 30
-incMultip = Button(710, y, 2, '+ Multiplier', 'ariel')
-y += 25
-decMultip = Button(710, y, 2, '- Multiplier', 'ariel')
-y += 30
-
-font = pygame.font.SysFont('ariel', 30)
+        pygame.draw.circle(render_screen, [color, color, color], (x, y), 1)
 
 while True:
     for event in pygame.event.get():
@@ -158,57 +144,25 @@ while True:
             pygame.display.quit()
             pygame.quit()
 
+    global mouse_pos
     mouse_pos = pygame.mouse.get_pos()
     mouse_pressed = pygame.mouse.get_pressed()
     key = pygame.key.get_pressed()
 
-    screen.fill([20, 20, 20])
-
-    renderMark = epoh()
-    screen.blit(Render(points, i), (0, 0))
-    renderMark -= epoh()
-
-    shouldScroll.update(screen, mouse_pos, mouse_pressed)
-    shouldSpin.update(screen, mouse_pos, mouse_pressed)
-    shouldLinealise.update(screen, mouse_pos, mouse_pressed)
-
-    # region Controlls Logic
-    if incXOffBtn.update(screen, mouse_pos, mouse_pressed):
-        offsetX += 10
+    screen.fill(0)
+    render_screen.fill(0)
     
-    if decXOffBtn.update(screen, mouse_pos, mouse_pressed):
-        offsetX -= 10
-    
-    if incYOffBtn.update(screen, mouse_pos, mouse_pressed):
-        offsetY += 10
-    
-    if decYOffBtn.update(screen, mouse_pos, mouse_pressed):
-        offsetY -= 10
-    
+    if settings.render_mode == 1:
+        Wire_Frame(render_screen, order, points)    
+    elif settings.render_mode == 2:
+        Face_View(render_screen, order, points)
+    else:
+        Vertex_View(render_screen, order, points)
 
-    if incZoom.update(screen, mouse_pos, mouse_pressed):
-        zoom += 0.25
-    
-    if decZoom.update(screen, mouse_pos, mouse_pressed):
-        zoom -= 0.25
+    points = Rotate(points)
 
-
-    if incMultip.update(screen, mouse_pos, mouse_pressed):
-        multip += 2
-        points = LoadModel(multip)
-    
-    if decMultip.update(screen, mouse_pos, mouse_pressed):
-        multip -= 2
-        points = LoadModel(multip)
-    #endregion
-
-    i -= 1
-    if i < lowestZ:
-        i = highestZ
-
-    screen.blit(font.render('Time to Render Frame  {}ms'.format(round(renderMark, 5) * -1000), 1, [255, 255, 255]), (710, 500))
-    screen.blit(font.render('Time to Render Vertex  {}ms'.format((round(renderMark, 5) / len(points)) * -1000), 1, [255, 255, 255]), (710, 530))
-    screen.blit(font.render('Vertex on Screen  {}'.format(len(points)), 1, [255, 255, 255]), (710, 560))
+    render_screen = pygame.transform.rotate(render_screen, 180)
+    screen.blit(render_screen, (0, 0))
 
     pygame.display.update()
     clock.tick(fps)
