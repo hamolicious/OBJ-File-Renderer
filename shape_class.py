@@ -17,6 +17,8 @@ class Shape():
         self.faces = faces
         self.texture_verts = vectorise_data(texture_verts)
 
+        self.draw_averages = False
+
         for vert in self.verts:
             val = randint(200, 255)
             vert.texture = [val, val, val]
@@ -57,13 +59,18 @@ class Shape():
             pygame.draw.circle(screen, [255, 255, 255], vert.get_xy_center(size), 2)
 
     def draw_face(self, screen, size):
+
+        averages = []
+
         def dist(elem):
             avrg = Vector(0,0,0)
             for vert in elem:
                 avrg.add(vert)
             avrg.div(len(elem))
 
-            return (0 - avrg.x)**2 + (0 - avrg.y)**2 + (-100 - avrg.z)**2
+            averages.append(avrg.get_xy_center(size))
+
+            return ((0 - avrg.x)**2 + (0 - avrg.y)**2 + (-1000 - avrg.z)**2)
 
         polygons = []
         for vert in self.faces:
@@ -80,3 +87,8 @@ class Shape():
                 color = verts[0].texture
 
             pygame.draw.polygon(screen, color, polygon)
+
+        if self.draw_averages:
+            for average in averages:
+                pygame.draw.circle(screen, [255, 0, 0], average, 5)
+

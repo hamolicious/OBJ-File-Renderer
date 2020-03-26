@@ -9,7 +9,7 @@ clock, fps = pygame.time.Clock(), 30
 
 bounding_box = 100
 
-path = 'models/cube.obj'
+path = 'TestModels\skyscraper.txt'
 shape = fi.load_obj(path, size, bounding_box)
 shape.flip()
 
