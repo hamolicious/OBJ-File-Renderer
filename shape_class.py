@@ -12,24 +12,20 @@ def vectorise_data(raw):
         return temp
 
 class Shape():
-    def __init__(self, verts, faces, texture_verts):
+    def __init__(self, verts, faces, texture_verts, normals):
         self.verts = vectorise_data(verts)
         self.faces = faces
         self.texture_verts = vectorise_data(texture_verts)
+        self.normals = vectorise_data(normals)
 
         self.draw_averages = False
+        self.draw_normals = False
 
         for vert in self.verts:
-            val = randint(200, 255)
-            vert.texture = [val, val, val]
-
-        self.colors = []
-        for _ in range(len(self.faces)):
             r = randint(0, 255)
             g = randint(0, 255)
             b = randint(0, 255)
-
-            self.colors.append([r, g, b])
+            vert.texture = [r, g, b]
 
     def flip(self):
         for vert in self.verts:
@@ -59,16 +55,14 @@ class Shape():
             pygame.draw.circle(screen, [255, 255, 255], vert.get_xy_center(size), 2)
 
     def draw_face(self, screen, size):
-
         averages = []
-
         def dist(elem):
             avrg = Vector(0,0,0)
             for vert in elem:
                 avrg.add(vert)
             avrg.div(len(elem))
 
-            averages.append(avrg.get_xy_center(size))
+            averages.append(avrg)
 
             return ((0 - avrg.x)**2 + (0 - avrg.y)**2 + (-1000 - avrg.z)**2)
 
@@ -90,5 +84,11 @@ class Shape():
 
         if self.draw_averages:
             for average in averages:
-                pygame.draw.circle(screen, [255, 0, 0], average, 5)
+                pygame.draw.circle(screen, [255, 0, 0], average.get_xy_center(size), 5)
+
+        if self.draw_normals:
+            for average, normal in zip(averages, self.normals):
+                pos = average + normal
+                pos.mult(2)
+                pygame.draw.line(screen, [0, 255, 0], average.get_xy_center(size), pos.get_xy_center(size), 3)
 

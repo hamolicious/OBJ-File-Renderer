@@ -2,11 +2,19 @@ from math import sin, cos, sqrt
 
 class Vector():
     def __init__(self, x, y, z):
+
+        if str in [type(x), type(y), type(z)]:
+            print('\n', x,y,z)
+            raise ValueError('Can only be numerical values')
+
         self.x = x
         self.y = y
         self.z = z
 
         self.texture = None
+
+    def __add__(self, other):
+        return Vector(self.x + other.x, self.y + other.y, self.z + other.z)
 
     def add(self, other):
         self.x += other.x
@@ -14,6 +22,11 @@ class Vector():
         self.z += other.z
 
     def div(self, other):
+        self.x /= other
+        self.y /= other
+        self.z /= other
+
+    def mult(self, other):
         self.x /= other
         self.y /= other
         self.z /= other

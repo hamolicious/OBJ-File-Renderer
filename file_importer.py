@@ -10,6 +10,7 @@ def load_obj(path, size, bounding_box):
     verts = []
     faces = []
     texture_verts = []
+    normals = []
     for line in raw:
         if line.split(' ')[0].lower() == 'v':
             verts.append(line.replace('v ', ''))
@@ -19,6 +20,9 @@ def load_obj(path, size, bounding_box):
 
         if line.split(' ')[0].lower() == 'vt':
             texture_verts.append(line.replace('vt ', ''))
+
+        if line.split(' ')[0].lower() == 'vn':
+            normals.append(line.replace('vn ', ''))
 
     highest_x = 0
     lowest_x = 10**10
@@ -40,12 +44,12 @@ def load_obj(path, size, bounding_box):
             highest_x = x
         if y > highest_y:
             highest_y = y
+        if z > highest_z:
+            highest_z = z
         if x < lowest_x:
             lowest_x = x
         if y < lowest_y:
             lowest_y = y
-        if z > highest_z:
-            highest_z = z
         if z < lowest_z:
             lowest_z = z
 
@@ -89,5 +93,13 @@ def load_obj(path, size, bounding_box):
         temp.append([x, y, 0])
     texture_verts = temp
 
+    # load normals
+    temp = []
+    for vert in normals:
+        x, y, z = vert.split(' ')
+
+        temp.append([float(x), float(y), float(z)])
+    normals = temp
+
     # create and return shape
-    return Shape(verts, faces, texture_verts)
+    return Shape(verts, faces, texture_verts, normals)
