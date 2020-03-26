@@ -3,6 +3,10 @@ Renders OBJ file formats to a 2D display, uses Python and Pygame
 
 To change any variable, open the settings.py file and read the descriptions of the variables there
 
+<strong>Required</strong><br>
+Python 3.8<br>
+Pygame 2.0.0.dev6
+
 To use this script use the following commands:
 ```
 pip install pygame
