@@ -1,7 +1,15 @@
 from shape_class import Shape
 from assistance_functions import map_from_to
 
-def load_obj(path, size, bounding_box):
+def load_obj(path, plane_size, screen_size, bounding_box=0):
+    """
+    Loads the OBJ file into a shape class
+    <path STRING> = Path to your OBJ
+    <plane_size TUPLE> = size of the screen for the object to be drawn to, this will clamp the object size into this range
+    <screen_size TUPLE> = the size of the actual pygame screen
+    <bounding_box INT> = a buffer that will be subtracted from the plane size
+    """
+
     # load raw lines
     with open(path, 'r') as file:
         raw = file.readlines()
@@ -65,9 +73,9 @@ def load_obj(path, size, bounding_box):
     for vert in verts:
         x, y, z = vert
 
-        x = map_from_to(x, master_low, master_high, bounding_box, size[0] - bounding_box) - size[0]/2
-        y = map_from_to(y, master_low, master_high, bounding_box, size[1] - bounding_box) - size[1]/2
-        z = map_from_to(z, master_low, master_high, bounding_box, size[0] - bounding_box) - size[0]/2
+        x = map_from_to(x, master_low, master_high, bounding_box, plane_size[0] - bounding_box) - plane_size[0]/2
+        y = map_from_to(y, master_low, master_high, bounding_box, plane_size[1] - bounding_box) - plane_size[1]/2
+        z = map_from_to(z, master_low, master_high, bounding_box, plane_size[0] - bounding_box) - plane_size[0]/2
 
         temp.append([x, y, z])
     verts = temp
@@ -102,4 +110,4 @@ def load_obj(path, size, bounding_box):
     normals = temp
 
     # create and return shape
-    return Shape(verts, faces, texture_verts, normals)
+    return Shape(screen_size, verts, faces, texture_verts, normals)

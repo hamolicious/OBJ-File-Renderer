@@ -8,10 +8,8 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption('3D OBJ File Renderer')
 clock, fps = pygame.time.Clock(), 30
 
-bounding_box = 100
-
-path = 'TestModels\cube.obj'
-shape = fi.load_obj(path, size, bounding_box)
+path = 'normals_test.obj'
+shape = fi.load_obj(path, (300, 300), size)
 shape.flip()
 
 while True:
@@ -26,8 +24,12 @@ while True:
 
     screen.fill(0)
 
-    shape.rotate(0.01, 0.01, 0.01)
-    shape.draw_face(screen, size)
+    shape.rotate(0, 0.01, 0)
+    shape.draw_face(screen)
 
     pygame.display.update()
+
+    if key[pygame.K_SPACE]:
+        pygame.image.save(screen, 'Frame/image.png')
+
     clock.tick(fps)
