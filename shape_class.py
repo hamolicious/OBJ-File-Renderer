@@ -12,11 +12,18 @@ def vectorise_data(raw):
 
     return temp
 
+def assign_id(vectors):
+    i = 0
+    for vec in vectors:
+        vec.id = i
+        i += 1
+    return vectors
+
 class Shape():
     def __init__(self, size, verts, faces, texture_verts, normals):
         self.size = size
 
-        self.verts = vectorise_data(verts)
+        self.verts = assign_id(vectorise_data(verts))
         self.faces = faces
         self.texture_verts = vectorise_data(texture_verts)
 
@@ -40,15 +47,11 @@ class Shape():
         for vert in self.verts:
             vert.rotate_x(pi)
 
-    def rotate(self, x, y, z):
+    def rotate(self, x=0, y=0.01, z=0):
         """Rotates the model around it's local center, arguments are specified in radians"""
         for vert in self.verts:
             vert.rotate_x(x)
-
-        for vert in self.verts:
             vert.rotate_y(y)
-
-        for vert in self.verts:
             vert.rotate_z(z)
 
     def draw_line(self, screen):
@@ -107,4 +110,3 @@ class Shape():
                 pos = average - normal
                 pos.mult(2)
                 pygame.draw.line(screen, [0, 255, 0], average.get_xy_center(self.size), pos.get_xy_center(self.size), 3)
-

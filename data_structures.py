@@ -13,6 +13,8 @@ class Vector():
 
         self.texture = None
 
+        self.id = None
+
     def __add__(self, other):
         return Vector(self.x + other.x, self.y + other.y, self.z + other.z)
 
@@ -54,3 +56,4 @@ class Vector():
         self.x = (cos(a) * self.x) + (-sin(a) * self.y) + (0 * self.z)
         self.y = (sin(a) * self.x) + (cos(a) * self.y) + (0 * self.z)
         self.z = (0 * self.x) + (0 * self.y) + (1 * self.z)
+

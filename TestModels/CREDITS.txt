@@ -1,4 +1,10 @@
 
-All models obtained from https://people.sc.fsu.edu/~jburkardt/data/obj/obj.html
+The following models obtained from https://people.sc.fsu.edu/~jburkardt/data/obj/obj.html:
+
+ - airboat
+ - cessna
+ - lamp
+ - skyscraper
+ - slotmachine
 
 I am in no way trying to potray these models as mine
