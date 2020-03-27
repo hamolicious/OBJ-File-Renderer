@@ -2,7 +2,7 @@
 Renders OBJ file formats to a 2D display, uses Python and Pygame
 
 <strong>Required</strong><br>
-Python 3.8<br>
+Python 2.7-3.8<br>
 Pygame 2.0.0.dev6
 
 To use this script use the following commands:
