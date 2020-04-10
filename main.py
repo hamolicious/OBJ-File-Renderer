@@ -11,7 +11,7 @@ clock, fps = pygame.time.Clock(), 30
 
 screen_plane = (300, 300)
 
-path = 'TestModels/robot.obj'
+path = 'D:/Blender/Projects/textured cube/Exported/textured cube.obj'
 shape = fi.load_obj(path, screen_plane, size)
 shape.flip()
 
@@ -27,8 +27,14 @@ while True:
 
     screen.fill(0)
 
-    shape.rotate()
-    shape.draw_face(screen)
+    shape.rotate(x=0.01, y=0.01)
+    shape.draw_line(screen)
+    # shape.draw_face(screen)
+
+    screen.blit(shape.texture, (0, 0))
+    for vert in shape.texture_verts:
+        pygame.draw.circle(screen, [150, 0, 0], vert.get_xy(), 2)
+
 
     pygame.display.update()
     clock.tick(fps)

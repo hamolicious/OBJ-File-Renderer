@@ -36,7 +36,10 @@ class Vector():
         self.y /= other
         self.z /= other
 
-    def get_xy(self):
+    def get_xy(self, return_true=False):
+        if return_true:
+            return (self.x, self.y)
+        
         return (int(self.x), int(self.y))
 
     def get_xy_center(self, size):
